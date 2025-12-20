@@ -1,0 +1,23 @@
+palettes:
+  - name: global_palette
+    fixed-entries:
+      - color: {index: 0, r: 255, g: 255, b: 255}
+      - color: {index: 1, r: 255, g: 216, b: 0}
+    images: automatic
+
+converts:
+  - name: minimal_tileset
+    palette: global_palette
+    tilesets:
+      tile-width: 16
+      tile-height: 16
+      images:
+        - minimal_tileset.png
+
+outputs:
+  - type: c
+    include-file: gfx.h
+    palettes:
+      - global_palette
+    converts:
+      - minimal_tileset
