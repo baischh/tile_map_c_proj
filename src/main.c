@@ -1,5 +1,7 @@
 #include <ti/getcsc.h>
 #include <graphx.h>
+#include <sys/util.h>
+#include <keypadc.h>
 
 /* Include the converted graphics file */
 #include "gfx/gfx.h"
@@ -17,8 +19,18 @@ extern unsigned char tilemap_map[];
 #define TILEMAP_DRAW_WIDTH  20
 #define TILEMAP_DRAW_HEIGHT 14
 
-#define Y_OFFSET            16
+#define Y_OFFSET            16 // for position bar ui element
 #define X_OFFSET            0
+
+
+#define START_X ((GFX_LCD_WIDTH - bug_width) / 2)
+#define START_Y ((GFX_LCD_HEIGHT - bug_height) / 2)
+
+/* Create a buffer to store the background behind the sprite */
+gfx_UninitedSprite(background, bug_width, bug_height);
+
+/* Prototype for draw sprite */
+void DrawSprite(int x, int y);
 
 int main(void)
 {
@@ -26,6 +38,13 @@ int main(void)
     unsigned int x_offset = 0;
     unsigned int y_offset = 0;
     gfx_tilemap_t tilemap;
+
+    background->width = bug_width;
+    background->height = bug_height;
+
+    /* Coordinates used for the sprite */
+    int x = START_X + x_offset;
+    int y = START_Y + y_offset;
 
     /* Initialize the tilemap structure */
     tilemap.map         = tilemap_map;
@@ -46,9 +65,10 @@ int main(void)
 
     /* Set the palette */
     gfx_SetPalette(global_palette, sizeof_global_palette, 0);
-    gfx_SetColor(0);
-    gfx_SetTextFGColor(1);
-    gfx_SetTextBGColor(0);
+    gfx_SetColor(1);
+    gfx_SetTextFGColor(2);
+    gfx_SetTextBGColor(1);
+    gfx_SetTransparentColor(0);
 
     /* Draw to buffer to avoid tearing */
     gfx_SetDrawBuffer();
@@ -81,6 +101,11 @@ int main(void)
         gfx_PrintUInt(block_mapped, 3);
         gfx_PrintString("/");
         gfx_PrintUInt(block_ptr, 3);
+
+        /* write the initial sprite background to the background buffer */
+        gfx_GetSprite(background, x, y);
+
+        DrawSprite(x, y);
 
         /* Do something based on the keypress */
         switch (key)
@@ -125,4 +150,23 @@ int main(void)
     gfx_End();
 
     return 0;
+}
+
+/* Function for drawing the main sprite */
+void DrawSprite(int x, int y)
+{
+    // static int oldX = START_X;
+    // static int oldY = START_Y;
+
+    // /* Render the original background */
+    // gfx_Sprite(background, oldX, oldY);
+
+    // /* Get the background behind the sprite */
+    // gfx_GetSprite(background, x, y);
+
+    /* Render the sprite */
+    gfx_TransparentSprite(bug, x, y);
+
+    // oldX = x;
+    // oldY = y;
 }
