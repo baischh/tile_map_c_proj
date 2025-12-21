@@ -43,8 +43,8 @@ int main(void)
     background->height = bug_height;
 
     /* Coordinates used for the sprite */
-    int x = START_X + x_offset;
-    int y = START_Y + y_offset;
+    int sprite_x = START_X + x_offset;
+    int sprite_y = START_Y + y_offset;
 
     /* Initialize the tilemap structure */
     tilemap.map         = tilemap_map;
@@ -103,46 +103,80 @@ int main(void)
         gfx_PrintUInt(block_ptr, 3);
 
         /* write the initial sprite background to the background buffer */
-        gfx_GetSprite(background, x, y);
+        gfx_GetSprite(background, sprite_x, sprite_y);
 
-        DrawSprite(x, y);
+        kb_key_t arrows;
 
-        /* Do something based on the keypress */
-        switch (key)
+        /* Scan the keypad to update kb_Data */
+        kb_Scan();
+
+        /* Get the arrow key statuses */
+        arrows = kb_Data[7];
+
+        /* Check if any arrows are pressed */
+        if (arrows)
         {
-            case sk_Down:
-                if (y_offset < (TILEMAP_HEIGHT * TILE_HEIGHT) - (TILEMAP_DRAW_HEIGHT * TILE_HEIGHT))
-                {
-                    y_offset += TILE_HEIGHT;
-                }
-                break;
+            /* Do different directions depending on the keypress */
+            if (arrows & kb_Right)
+            {
+                sprite_x += 2;
+            }
+            if (arrows & kb_Left)
+            {
+                sprite_x -= 2;
+            }
+            if (arrows & kb_Down)
+            {
+                sprite_y += 2;
+            }
+            if (arrows & kb_Up)
+            {
+                sprite_y -= 2;
+            }
 
-            case sk_Left:
-                if (x_offset)
-                {
-                    x_offset -= TILE_WIDTH;
-                }
-                break;
+            /* Render the sprite */
+            DrawSprite(sprite_x, sprite_y);
 
-            case sk_Right:
-                if (x_offset < (TILEMAP_WIDTH * TILE_WIDTH) - (TILEMAP_DRAW_WIDTH * TILE_WIDTH))
-                {
-                    x_offset += TILE_WIDTH;
-                }
-                break;
+            /* Copy the buffer to the screen */
+            /* Same as gfx_Blit(gfx_buffer) */
 
-            case sk_Up:
-                if (y_offset)
-                {
-                    y_offset -= TILE_HEIGHT;
-                }
-                break;
-
-            default:
-                break;
+            gfx_SwapDraw();
         }
+        // /* Do something based on the keypress */
+        // switch (key)
+        // {
+        //     case sk_Down:
+        //         if (y_offset < (TILEMAP_HEIGHT * TILE_HEIGHT) - (TILEMAP_DRAW_HEIGHT * TILE_HEIGHT))
+        //         {
+        //             y_offset += TILE_HEIGHT;
+        //         }
+        //         break;
 
-        gfx_SwapDraw();
+        //     case sk_Left:
+        //         if (x_offset)
+        //         {
+        //             x_offset -= TILE_WIDTH;
+        //         }
+        //         break;
+
+        //     case sk_Right:
+        //         if (x_offset < (TILEMAP_WIDTH * TILE_WIDTH) - (TILEMAP_DRAW_WIDTH * TILE_WIDTH))
+        //         {
+        //             x_offset += TILE_WIDTH;
+        //         }
+        //         break;
+
+        //     case sk_Up:
+        //         if (y_offset)
+        //         {
+        //             y_offset -= TILE_HEIGHT;
+        //         }
+        //         break;
+
+        //     default:
+        //         break;
+        // }
+
 
     } while (key != sk_Enter);
 
