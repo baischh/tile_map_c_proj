@@ -2,6 +2,8 @@
 #include <graphx.h>
 #include <sys/util.h>
 #include <keypadc.h>
+#include "player.h"
+#include "defines.h"
 
 /* Include the converted graphics file */
 #include "gfx/gfx.h"
@@ -9,46 +11,24 @@
 /* Include the external tilemap data */
 extern unsigned char tilemap_map[];
 
-/* Tilemap defines */
-#define TILE_WIDTH          16
-#define TILE_HEIGHT         16
+player_t player;
 
-#define TILEMAP_WIDTH       20
-#define TILEMAP_HEIGHT      20 
-
-#define TILEMAP_DRAW_WIDTH  20
-#define TILEMAP_DRAW_HEIGHT 14
-
-#define Y_OFFSET            16 // for position bar ui element
-#define X_OFFSET            0
-
-
-#define START_X ((GFX_LCD_WIDTH - bug_width) / 2)
-#define START_Y ((GFX_LCD_HEIGHT - bug_height) / 2)
-
-/* Create a buffer to store the background behind the sprite */
-gfx_UninitedSprite(background, bug_width, bug_height);
+bool game_over = true;
 
 /* Prototype for draw sprite */
-void DrawSprite(int x, int y);
+void draw_sprite(int x, int y);
+void init_player(void);
 
 int main(void)
 {
     uint8_t key;
-    unsigned int x_offset = 0;
-    unsigned int y_offset = 0;
     gfx_tilemap_t tilemap;
 
-    background->width = bug_width;
-    background->height = bug_height;
-
-    /* Coordinates used for the sprite */
-    int sprite_x = START_X + x_offset;
-    int sprite_y = START_Y + y_offset;
+    init_player();
 
     /* Initialize the tilemap structure */
     tilemap.map         = tilemap_map;
-    tilemap.tiles       = minimal_tileset_tiles;
+    tilemap.tiles       = blueskytileset02_tiles;
     tilemap.type_width  = gfx_tile_16_pixel;
     tilemap.type_height = gfx_tile_16_pixel;
     tilemap.tile_height = TILE_HEIGHT;
@@ -57,8 +37,8 @@ int main(void)
     tilemap.draw_width  = TILEMAP_DRAW_WIDTH;
     tilemap.height      = TILEMAP_HEIGHT;
     tilemap.width       = TILEMAP_WIDTH;
-    tilemap.y_loc       = Y_OFFSET;
-    tilemap.x_loc       = X_OFFSET;
+    tilemap.y_loc       = player.scrolly;
+    tilemap.x_loc       = player.scrollx;
 
     /* Initialize graphics drawing */
     gfx_Begin();
@@ -85,98 +65,30 @@ int main(void)
         /* Get the key */
         key = os_GetCSC();
 
-        /* Draw tilemap and coords */
-        gfx_Tilemap_NoClip(&tilemap, x_offset, y_offset);
-        gfx_FillRectangle(0, 0, 320, 16);
-        gfx_PrintStringXY("x:", 64, 4);
-        gfx_PrintInt(x_offset, 3);
-        gfx_PrintString(" y:");
-        gfx_PrintInt(y_offset, 3);
-        gfx_PrintString(" block:");
-
-        /* Or use gfx_GetTileMapped() and gfx_GetTile() */
-        block_mapped = *gfx_TilePtrMapped(&tilemap, x_offset / TILE_WIDTH, y_offset / TILE_HEIGHT);
-        block_ptr = *gfx_TilePtr(&tilemap, x_offset, y_offset);
-
-        gfx_PrintUInt(block_mapped, 3);
-        gfx_PrintString("/");
-        gfx_PrintUInt(block_ptr, 3);
-
-        /* write the initial sprite background to the background buffer */
-        gfx_GetSprite(background, sprite_x, sprite_y);
-
         kb_key_t arrows;
+        kb_key_t g1_key, g2_key, g3_key, g7_key;
 
         /* Scan the keypad to update kb_Data */
         kb_Scan();
 
+        g1_key = kb_Data[1];
+        g2_key = kb_Data[2];
+        g7_key = kb_Data[7];
+        pressed_2nd = (g1_key & kb_2nd);
+        pressed_down = (g7_key & kb_Down);
+        pressed_left = (g7_key & kb_Left);
+        pressed_right = (g7_key & kb_Right);
+
         /* Get the arrow key statuses */
-        arrows = kb_Data[7];
+        move_player();
 
-        /* Check if any arrows are pressed */
-        if (arrows)
+        gfx_Tilemap(&tilemap, player.scrollx, player.scrolly);
+        draw_sprite(player.rel_x, player.rel_y);
+        gfx_SwapDraw();
+        if (game_over)
         {
-            /* Do different directions depending on the keypress */
-            if (arrows & kb_Right)
-            {
-                sprite_x += 2;
-            }
-            if (arrows & kb_Left)
-            {
-                sprite_x -= 2;
-            }
-            if (arrows & kb_Down)
-            {
-                sprite_y += 2;
-            }
-            if (arrows & kb_Up)
-            {
-                sprite_y -= 2;
-            }
-
-            /* Render the sprite */
-            DrawSprite(sprite_x, sprite_y);
-
-            /* Copy the buffer to the screen */
-            /* Same as gfx_Blit(gfx_buffer) */
-
-            gfx_SwapDraw();
+            init_player();
         }
-        // /* Do something based on the keypress */
-        // switch (key)
-        // {
-        //     case sk_Down:
-        //         if (y_offset < (TILEMAP_HEIGHT * TILE_HEIGHT) - (TILEMAP_DRAW_HEIGHT * TILE_HEIGHT))
-        //         {
-        //             y_offset += TILE_HEIGHT;
-        //         }
-        //         break;
-
-        //     case sk_Left:
-        //         if (x_offset)
-        //         {
-        //             x_offset -= TILE_WIDTH;
-        //         }
-        //         break;
-
-        //     case sk_Right:
-        //         if (x_offset < (TILEMAP_WIDTH * TILE_WIDTH) - (TILEMAP_DRAW_WIDTH * TILE_WIDTH))
-        //         {
-        //             x_offset += TILE_WIDTH;
-        //         }
-        //         break;
-
-        //     case sk_Up:
-        //         if (y_offset)
-        //         {
-        //             y_offset -= TILE_HEIGHT;
-        //         }
-        //         break;
-
-        //     default:
-        //         break;
-        // }
-
 
     } while (key != sk_Enter);
 
@@ -186,21 +98,21 @@ int main(void)
     return 0;
 }
 
-/* Function for drawing the main sprite */
-void DrawSprite(int x, int y)
+void init_player(void)
 {
-    // static int oldX = START_X;
-    // static int oldY = START_Y;
+    /* Coordinates used for the sprite */
+    player.x = START_X;
+    player.y = START_Y;
+    player.hitbox.width = PLAYER_HITBOX_WIDTH;
+    player.hitbox.height = PLAYER_HITBOX_HEIGHT;
+    player.scrollx = 0;
+    player.scrolly = 0;
 
-    // /* Render the original background */
-    // gfx_Sprite(background, oldX, oldY);
+    game_over = false;
+}
 
-    // /* Get the background behind the sprite */
-    // gfx_GetSprite(background, x, y);
-
-    /* Render the sprite */
-    gfx_TransparentSprite(bug, x, y);
-
-    // oldX = x;
-    // oldY = y;
+/* Function for drawing the main sprite */
+void draw_sprite(int x, int y)
+{
+    gfx_TransparentSprite(Sprite0003, x, y);
 }
