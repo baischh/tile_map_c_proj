@@ -7,6 +7,8 @@ extern bool pressed_down;
 extern bool pressed_alpha;
 extern bool pressed_2nd;
 
+extern bool player_did_collide;
+
 extern bool allow_up_press;
 
 void move_player(void);

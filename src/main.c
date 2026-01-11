@@ -3,6 +3,7 @@
 #include <sys/util.h>
 #include <keypadc.h>
 #include "player.h"
+#include "objects.h"
 #include "defines.h"
 
 /* Include the converted graphics file */
@@ -12,12 +13,15 @@
 extern unsigned char tilemap_map[];
 
 player_t player;
+object_t platform;
 
 bool game_over = true;
 
 /* Prototype for draw sprite */
 void draw_sprite(int x, int y);
 void init_player(void);
+void init_objects(void);
+void draw_platform(void);
 
 int main(void)
 {
@@ -25,6 +29,7 @@ int main(void)
     gfx_tilemap_t tilemap;
 
     init_player();
+    init_objects();
 
     /* Initialize the tilemap structure */
     tilemap.map         = tilemap_map;
@@ -81,9 +86,11 @@ int main(void)
 
         /* Get the arrow key statuses */
         move_player();
+        move_objects();
 
         gfx_Tilemap(&tilemap, player.scrollx, player.scrolly);
         draw_sprite(player.rel_x, player.rel_y);
+        draw_platform();
         gfx_SwapDraw();
         if (game_over)
         {
@@ -111,8 +118,23 @@ void init_player(void)
     game_over = false;
 }
 
+void init_objects(void)
+{
+    platform.bounding_box.width = 32;
+    platform.bounding_box.height = 16;
+    platform.x = 64;
+    platform.y = 176;
+}
+
 /* Function for drawing the main sprite */
 void draw_sprite(int x, int y)
 {
     gfx_TransparentSprite(Sprite0003, x, y);
+}
+
+void draw_platform(void)
+{
+    int x = platform.x - player.scrollx;
+    int y = platform.y - player.scrolly;
+    gfx_TransparentSprite(brick_platform, x, y);
 }

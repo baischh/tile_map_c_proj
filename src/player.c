@@ -13,6 +13,7 @@
 #include "tile_handlers.h"
 #include "defines.h"
 #include "player.h"
+#include "objects.h"
 
 bool pressed_left = false;
 bool pressed_right = false;
@@ -22,25 +23,16 @@ bool pressed_alpha = false;
 bool pressed_2nd = false;
 bool allow_up_press = true;
 
-
-/**
- * tile types
- * 
- * 0: solid
- * 1: movable
- * 2: climbable
- * 3: danger
- */
-const uint8_t tile_types[16] = {
-    1, 1, 3, 2,
-    0, 0, 0, 2,
-    1, 3, 1, 2,
-    1, 1, 1, 2
-};
+bool player_did_collide = true;
 
 extern const uint8_t tilemap_map[];
 extern bool game_over;
 
+/**
+ * Returns the prop bits for a given position as a uint8_t
+ * ex. PROP_SOLID = 0000 0001 = 1
+ * Props defined in defines.h and assigned in tile_handers.c
+ */
 uint8_t get_tile_props(int x, int y) {
     int tx = x / TILE_WIDTH;
     int ty = y / TILE_HEIGHT;
@@ -61,6 +53,7 @@ bool solid_at_px(int x, int y) {
             || tile == 6
             || tile == 11);
 }
+
 
 
 /**
@@ -86,14 +79,13 @@ void move_player(void) {
     new_x_right = new_x_left + PLAYER_HITBOX_WIDTH;
     mm = player.momentum;
 
-    // test_y_ptr = &new_y_top;
-    // test_y_height = player.hitbox.height;
-
     player.rel_x = new_x_left - player.scrollx;
     player.rel_y = new_y_top - player.scrolly;
 
-    right_bottom_test = !solid_at_px(new_x_right, new_y_bot + 1);
-    left_bottom_test  = !solid_at_px(new_x_left, new_y_bot + 1);
+
+    //TODO: legacy code pulled from OIRAM update w/ bitwise props
+    right_bottom_test = !(get_tile_props(new_x_right, new_y_bot + 1) & PROP_SOLID);
+    left_bottom_test  = !(get_tile_props(new_x_left, new_y_bot + 1) & PROP_SOLID);
 
     climbing = ((get_tile_props(player.x, player.y + PLAYER_HITBOX_HEIGHT - 1) |
                 get_tile_props(player.x + 16 - 1, player.y + PLAYER_HITBOX_HEIGHT - 1)) & PROP_CLIMBABLE);
@@ -117,7 +109,6 @@ void move_player(void) {
     {
         player.vy = 4;
     }
-    
 
     if (pressed_2nd) 
     {
@@ -139,17 +130,18 @@ void move_player(void) {
 
     if (player.vy)
     {
-
         int distance_to_move = player.vy;
 
-        if (solid_at_px(player.x, player.y + PLAYER_HITBOX_HEIGHT + player.vy) ||
-            solid_at_px(player.x + 16 - 1, player.y + PLAYER_HITBOX_HEIGHT + player.vy) ) {
+        if ((get_tile_props(player.x, player.y + PLAYER_HITBOX_HEIGHT + player.vy) |
+            get_tile_props(player.x + 16 - 1, player.y + PLAYER_HITBOX_HEIGHT + player.vy)) & PROP_SOLID)
+        {
             distance_to_move = player.vy - ((player.y + PLAYER_HITBOX_HEIGHT + player.vy) % 16);
             player.vy = 0;
         }
 
-        if (solid_at_px(player.x, player.y - 1) ||
-            solid_at_px(player.x + PLAYER_HITBOX_WIDTH - 1, player.y - 1) ) {
+        if ((get_tile_props(player.x, player.y - 1) |
+            get_tile_props(player.x + PLAYER_HITBOX_WIDTH - 1, player.y - 1)) & PROP_SOLID)
+        {
             player.vy = 0;
         }
 
@@ -183,6 +175,7 @@ void move_player(void) {
         }
     }
 
+
     int rel_x = player.x - player.scrollx;
     int rel_y = player.y - player.scrolly;
 
@@ -206,8 +199,8 @@ void move_player(void) {
     if (player.scrollx > max_scroll_x) player.scrollx = max_scroll_x;
     if (player.scrolly > max_scroll_y) player.scrolly = max_scroll_y;
 
-    if ((get_tile_props(player.x, player.y + PLAYER_HITBOX_HEIGHT + player.vy) | 
-        get_tile_props(player.x + 16 - 1, player.y + PLAYER_HITBOX_HEIGHT + player.vy)) & PROP_DANGER)
+    if ((get_tile_props(player.x, player.y + PLAYER_HITBOX_HEIGHT - 1) | 
+        get_tile_props(player.x + 16 - 1, player.y + PLAYER_HITBOX_HEIGHT - 1)) & PROP_DANGER)
     {
         game_over = true;
     }
