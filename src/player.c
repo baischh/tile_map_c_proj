@@ -41,20 +41,6 @@ uint8_t get_tile_props(int x, int y) {
     return tile_props[tile];
 }
 
-/**
- * Return true if the tile at px coords is solid
- */
-bool solid_at_px(int x, int y) {
-    int tx = x / TILE_WIDTH;
-    int ty = y / TILE_HEIGHT;
-    uint8_t tile = tilemap_map[ty * TILEMAP_WIDTH + tx];
-    return (tile == 4
-            || tile == 5
-            || tile == 6
-            || tile == 11);
-}
-
-
 
 /**
  * Handle all player motion by managing three coordinate systems:  
