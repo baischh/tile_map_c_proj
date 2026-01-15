@@ -19,6 +19,7 @@ converts:
     images:
       - Sprite0003.png
       - brick_platform.png
+      - cactusman.png
 
 outputs:
   - type: c

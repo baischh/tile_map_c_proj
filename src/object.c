@@ -14,7 +14,7 @@ bool moving_forward = true;
 /**
  * Detects collision with the moving platform
  */
-void detect_collision(void)
+void detect_object_collision(void)
 {
     if
     (

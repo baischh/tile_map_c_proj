@@ -5,6 +5,7 @@
 #include "player.h"
 #include "objects.h"
 #include "defines.h"
+#include "enemy.h"
 
 /* Include the converted graphics file */
 #include "gfx/gfx.h"
@@ -14,6 +15,7 @@ extern unsigned char tilemap_map[];
 
 player_t player;
 object_t platform;
+enemie_t enemy;
 
 bool game_over = true;
 
@@ -22,6 +24,8 @@ void draw_sprite(int x, int y);
 void init_player(void);
 void init_objects(void);
 void draw_platform(void);
+void init_enemies(void);
+void draw_enemy(void);
 
 int main(void)
 {
@@ -30,6 +34,7 @@ int main(void)
 
     init_player();
     init_objects();
+    init_enemies();
 
     /* Initialize the tilemap structure */
     tilemap.map         = tilemap_map;
@@ -83,14 +88,17 @@ int main(void)
         pressed_down = (g7_key & kb_Down);
         pressed_left = (g7_key & kb_Left);
         pressed_right = (g7_key & kb_Right);
+        pressed_up = (g7_key & kb_Up);
 
         /* Get the arrow key statuses */
+        move_enemy();
         move_player();
+        detect_enemy_collision();
         move_objects();
 
         gfx_Tilemap(&tilemap, player.scrollx, player.scrolly);
         draw_sprite(player.rel_x, player.rel_y);
-        draw_platform();
+        draw_enemy();
         gfx_SwapDraw();
         if (game_over)
         {
@@ -126,15 +134,24 @@ void init_objects(void)
     platform.y = 176;
 }
 
+void init_enemies(void)
+{
+    enemy.hitbox.width = 16;
+    enemy.hitbox.height = 16;
+    enemy.x = 64;
+    enemy.y = 176;
+
+}
+
 /* Function for drawing the main sprite */
 void draw_sprite(int x, int y)
 {
     gfx_TransparentSprite(Sprite0003, x, y);
 }
 
-void draw_platform(void)
+void draw_enemy(void)
 {
-    int x = platform.x - player.scrollx;
-    int y = platform.y - player.scrolly;
-    gfx_TransparentSprite(brick_platform, x, y);
+    int x = enemy.x - player.scrollx;
+    int y = enemy.y - player.scrolly;
+    gfx_TransparentSprite(cactusman, x, y);
 }

@@ -96,7 +96,7 @@ void move_player(void) {
         player.vy = 4;
     }
 
-    if (pressed_2nd) 
+    if (pressed_up) 
     {
         if(climbing)
         {
@@ -170,7 +170,7 @@ void move_player(void) {
 
     // horizontal follow
     if (rel_x > (GFX_LCD_WIDTH - SCROLL_MARGIN_X - player.hitbox.width)) player.scrollx += 4;
-    if (rel_x < SCROLL_MARGIN_X)                               player.scrollx -= 4;
+    if (rel_x < SCROLL_MARGIN_X) player.scrollx -= 4;
 
     // vertical follow (if you have a 16px UI bar, treat your “viewport” as starting at y=16)
     if (rel_y > (SCREEN_HEIGHT - SCROLL_MARGIN_Y - player.hitbox.height)) player.scrolly += 4;
@@ -181,7 +181,8 @@ void move_player(void) {
     if (player.scrolly < 0) player.scrolly = 0;
 
     int max_scroll_x = TILEMAP_WIDTH*TILE_WIDTH - TILEMAP_DRAW_WIDTH*TILE_WIDTH;
-    int max_scroll_y = TILEMAP_HEIGHT*TILE_HEIGHT - TILEMAP_DRAW_HEIGHT*TILE_HEIGHT;
+    int max_scroll_y = 0;
+
     if (player.scrollx > max_scroll_x) player.scrollx = max_scroll_x;
     if (player.scrolly > max_scroll_y) player.scrolly = max_scroll_y;
 

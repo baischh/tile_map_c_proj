@@ -9,7 +9,7 @@
 #define TILEMAP_HEIGHT      16 
 
 #define TILEMAP_DRAW_WIDTH  21
-#define TILEMAP_DRAW_HEIGHT 16
+#define TILEMAP_DRAW_HEIGHT 15
 
 #define SCROLL_MARGIN_X (10 * TILE_WIDTH)   // 2 tiles from left/right
 #define SCROLL_MARGIN_Y (4 * TILE_HEIGHT)  // 2 tiles from top/bottom

@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "character.h"
 
 extern bool pressed_left;
 extern bool pressed_right;
@@ -12,10 +13,6 @@ extern bool player_did_collide;
 extern bool allow_up_press;
 
 void move_player(void);
-
-typedef struct {
-   uint8_t width, height;
-} hitbox_t;
 
 typedef struct {
     hitbox_t hitbox;
