@@ -7,7 +7,7 @@
 #include "tile_handlers.h"
 #include "defines.h"
 #include "player.h"
-#include "objects.h"
+#include "object.h"
 
 bool moving_forward = true;
 

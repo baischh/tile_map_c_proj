@@ -25,3 +25,5 @@
 #define PROP_SOLID      (1 << 0) // 0000 0001 (1)
 #define PROP_CLIMBABLE  (1 << 1) // 0000 0010 (2)
 #define PROP_DANGER     (1 << 2) // 0000 0100 (4)
+
+#define MAX_ACTIVE_ENEMIES 8

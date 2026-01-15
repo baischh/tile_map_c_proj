@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "character.h"
+#include "game_sprite.h"
 
 extern bool pressed_left;
 extern bool pressed_right;

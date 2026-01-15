@@ -2,18 +2,12 @@
  * player.c handles player movement and player state
  * manages key press flags
  */
-
-
 #include <stdbool.h>
 #include <stdint.h>
-#include <graphx.h>
-#include <keypadc.h>
-#include <fileioc.h>
 
 #include "tile_handlers.h"
 #include "defines.h"
 #include "player.h"
-#include "objects.h"
 
 bool pressed_left = false;
 bool pressed_right = false;

@@ -3,7 +3,7 @@
 #include <sys/util.h>
 #include <keypadc.h>
 #include "player.h"
-#include "objects.h"
+#include "object.h"
 #include "defines.h"
 #include "enemy.h"
 
@@ -15,7 +15,10 @@ extern unsigned char tilemap_map[];
 
 player_t player;
 object_t platform;
-enemie_t enemy;
+
+gfx_sprite_t *enemy_sprites[] = {
+    cactusman
+};
 
 bool game_over = true;
 
@@ -27,6 +30,42 @@ void draw_platform(void);
 void init_enemies(void);
 void draw_enemy(void);
 
+void spawn_manager()
+{
+    enemy_template_t e = spawn_list[0];
+
+    active_enemies[0] = (enemy_t){
+        .active = true,
+        .hitbox = {16, 16},
+        .type = CACTUS_MAN,
+        .x = spawn_list[0].spawn_x,
+        .y = spawn_list[0].spawn_y,
+        .rel_x = spawn_list[0].spawn_x - player.scrollx,
+        .rel_y = spawn_list[0].spawn_y - player.scrolly,
+        .vx = 0,
+        .vy = 0
+    };
+}
+
+
+void despawn_manager()
+{
+
+}
+
+
+void draw_enemies()
+{
+    enemy_t *e = &active_enemies[0];
+    for (char i = 0; i < MAX_ACTIVE_ENEMIES; i++, e++) {
+        if (e->active)
+        {
+            gfx_TransparentSprite(enemy_sprites[e->type], e->rel_x, e->rel_y);
+        }
+    }
+}
+
+
 int main(void)
 {
     uint8_t key;
@@ -34,7 +73,6 @@ int main(void)
 
     init_player();
     init_objects();
-    init_enemies();
 
     /* Initialize the tilemap structure */
     tilemap.map         = tilemap_map;
@@ -66,6 +104,8 @@ int main(void)
     /* Set monospace font with width of 8 */
     gfx_SetMonospaceFont(8);
 
+    spawn_manager();
+
     /* Wait for the enter key to quit */
     do
     {
@@ -91,14 +131,13 @@ int main(void)
         pressed_up = (g7_key & kb_Up);
 
         /* Get the arrow key statuses */
-        move_enemy();
         move_player();
         detect_enemy_collision();
         move_objects();
 
         gfx_Tilemap(&tilemap, player.scrollx, player.scrolly);
         draw_sprite(player.rel_x, player.rel_y);
-        draw_enemy();
+        draw_enemies();
         gfx_SwapDraw();
         if (game_over)
         {
@@ -134,24 +173,9 @@ void init_objects(void)
     platform.y = 176;
 }
 
-void init_enemies(void)
-{
-    enemy.hitbox.width = 16;
-    enemy.hitbox.height = 16;
-    enemy.x = 64;
-    enemy.y = 176;
-
-}
 
 /* Function for drawing the main sprite */
 void draw_sprite(int x, int y)
 {
     gfx_TransparentSprite(Sprite0003, x, y);
-}
-
-void draw_enemy(void)
-{
-    int x = enemy.x - player.scrollx;
-    int y = enemy.y - player.scrolly;
-    gfx_TransparentSprite(cactusman, x, y);
 }
