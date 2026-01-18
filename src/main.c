@@ -80,7 +80,6 @@ int main(void)
     init_player();
     init_objects();
 
-    /* Initialize the tilemap structure */
     tilemap.map         = tilemap_map;
     tilemap.tiles       = blueskytileset02_tiles;
     tilemap.type_width  = gfx_tile_16_pixel;
@@ -94,37 +93,22 @@ int main(void)
     tilemap.y_loc       = scroll_y;
     tilemap.x_loc       = scroll_x;
 
-    /* Initialize graphics drawing */
     gfx_Begin();
-
-    /* Set the palette */
     gfx_SetPalette(global_palette, sizeof_global_palette, 0);
-    gfx_SetColor(1);
-    gfx_SetTextFGColor(2);
-    gfx_SetTextBGColor(1);
     gfx_SetTransparentColor(0);
-
-    /* Draw to buffer to avoid tearing */
     gfx_SetDrawBuffer();
-
-    /* Set monospace font with width of 8 */
-    gfx_SetMonospaceFont(8);
 
     spawn_manager();
 
-    /* Wait for the enter key to quit */
     do
     {
         uint8_t block_mapped;
         uint8_t block_ptr;
-
-        /* Get the key */
-        key = os_GetCSC();
-
         kb_key_t arrows;
         kb_key_t g1_key, g2_key, g3_key, g7_key;
 
-        /* Scan the keypad to update kb_Data */
+        key = os_GetCSC();
+
         kb_Scan();
 
         g1_key = kb_Data[1];
@@ -136,12 +120,10 @@ int main(void)
         pressed_right = (g7_key & kb_Right);
         pressed_up = (g7_key & kb_Up);
 
-        /* Get the arrow key statuses */
         move_player();
         update_enemies();
-        detect_enemy_collision();
         move_objects();
-
+        detect_enemy_collision();
         gfx_Tilemap(&tilemap, scroll_x, scroll_y);
         draw_sprite(player.rel_x, player.rel_y);
         draw_enemies();
@@ -153,15 +135,14 @@ int main(void)
 
     } while (key != sk_Enter);
 
-    /* End graphics drawing */
     gfx_End();
 
     return 0;
 }
 
+
 void init_player(void)
 {
-    /* Coordinates used for the sprite */
     player.x = START_X;
     player.y = START_Y;
     player.hitbox.width = PLAYER_HITBOX_WIDTH;
@@ -172,6 +153,7 @@ void init_player(void)
     game_over = false;
 }
 
+
 void init_objects(void)
 {
     platform.bounding_box.width = 32;
@@ -181,7 +163,6 @@ void init_objects(void)
 }
 
 
-/* Function for drawing the main sprite */
 void draw_sprite(int x, int y)
 {
     gfx_TransparentSprite(Sprite0003, x, y);
