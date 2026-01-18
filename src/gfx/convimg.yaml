@@ -20,6 +20,8 @@ converts:
       - Sprite0003.png
       - brick_platform.png
       - cactusman.png
+      - fireguy.png
+      - heart.png
 
 outputs:
   - type: c

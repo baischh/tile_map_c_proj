@@ -15,9 +15,12 @@ extern unsigned char tilemap_map[];
 
 player_t player;
 object_t platform;
+int scroll_x;
+int scroll_y;
 
 gfx_sprite_t *enemy_sprites[] = {
-    cactusman
+    cactusman,
+    fireguy
 };
 
 bool game_over = true;
@@ -32,19 +35,22 @@ void draw_enemy(void);
 
 void spawn_manager()
 {
-    enemy_template_t e = spawn_list[0];
+    enemy_template_t *e = &spawn_list[0];
 
-    active_enemies[0] = (enemy_t){
-        .active = true,
-        .hitbox = {16, 16},
-        .type = CACTUS_MAN,
-        .x = spawn_list[0].spawn_x,
-        .y = spawn_list[0].spawn_y,
-        .rel_x = spawn_list[0].spawn_x - player.scrollx,
-        .rel_y = spawn_list[0].spawn_y - player.scrolly,
-        .vx = 0,
-        .vy = 0
-    };
+    for (char i = 0; i < MAX_ACTIVE_ENEMIES; i++, e++)
+    {
+        active_enemies[i] = (enemy_t){
+            .active = true,
+            .hitbox = {16, 16},
+            .type = e->type,
+            .x = e->spawn_x,
+            .y = e->spawn_y,
+            .rel_x = e->spawn_x - scroll_x,
+            .rel_y = e->spawn_y - scroll_y,
+            .vx = 2,
+            .vy = 0
+        };
+    }
 }
 
 
@@ -85,8 +91,8 @@ int main(void)
     tilemap.draw_width  = TILEMAP_DRAW_WIDTH;
     tilemap.height      = TILEMAP_HEIGHT;
     tilemap.width       = TILEMAP_WIDTH;
-    tilemap.y_loc       = player.scrolly;
-    tilemap.x_loc       = player.scrollx;
+    tilemap.y_loc       = scroll_y;
+    tilemap.x_loc       = scroll_x;
 
     /* Initialize graphics drawing */
     gfx_Begin();
@@ -132,10 +138,11 @@ int main(void)
 
         /* Get the arrow key statuses */
         move_player();
+        update_enemies();
         detect_enemy_collision();
         move_objects();
 
-        gfx_Tilemap(&tilemap, player.scrollx, player.scrolly);
+        gfx_Tilemap(&tilemap, scroll_x, scroll_y);
         draw_sprite(player.rel_x, player.rel_y);
         draw_enemies();
         gfx_SwapDraw();
@@ -159,8 +166,8 @@ void init_player(void)
     player.y = START_Y;
     player.hitbox.width = PLAYER_HITBOX_WIDTH;
     player.hitbox.height = PLAYER_HITBOX_HEIGHT;
-    player.scrollx = 0;
-    player.scrolly = 0;
+    scroll_x = 0;
+    scroll_y = 0;
 
     game_over = false;
 }

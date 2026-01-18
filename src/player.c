@@ -21,19 +21,8 @@ bool player_did_collide = true;
 
 extern const uint8_t tilemap_map[];
 extern bool game_over;
+extern int scroll_x, scroll_y;
 
-/**
- * Returns the prop bits for a given position as a uint8_t
- * ex. PROP_SOLID = 0000 0001 = 1
- * Props defined in defines.h and assigned in tile_handers.c
- */
-uint8_t get_tile_props(int x, int y) {
-    int tx = x / TILE_WIDTH;
-    int ty = y / TILE_HEIGHT;
-    uint8_t tile = tilemap_map[ty * TILEMAP_WIDTH + tx];
-
-    return tile_props[tile];
-}
 
 
 /**
@@ -59,8 +48,8 @@ void move_player(void) {
     new_x_right = new_x_left + PLAYER_HITBOX_WIDTH;
     mm = player.momentum;
 
-    player.rel_x = new_x_left - player.scrollx;
-    player.rel_y = new_y_top - player.scrolly;
+    player.rel_x = new_x_left - scroll_x;
+    player.rel_y = new_y_top - scroll_y;
 
 
     //TODO: legacy code pulled from OIRAM update w/ bitwise props
@@ -156,29 +145,29 @@ void move_player(void) {
     }
 
 
-    int rel_x = player.x - player.scrollx;
-    int rel_y = player.y - player.scrolly;
+    int rel_x = player.x - scroll_x;
+    int rel_y = player.y - scroll_y;
 
     player.rel_x = rel_x;
     player.rel_y = rel_y;
 
     // horizontal follow
-    if (rel_x > (GFX_LCD_WIDTH - SCROLL_MARGIN_X - player.hitbox.width)) player.scrollx += 4;
-    if (rel_x < SCROLL_MARGIN_X) player.scrollx -= 4;
+    if (rel_x > (GFX_LCD_WIDTH - SCROLL_MARGIN_X - player.hitbox.width)) scroll_x += 4;
+    if (rel_x < SCROLL_MARGIN_X) scroll_x -= 4;
 
     // vertical follow (if you have a 16px UI bar, treat your “viewport” as starting at y=16)
-    if (rel_y > (SCREEN_HEIGHT - SCROLL_MARGIN_Y - player.hitbox.height)) player.scrolly += 4;
-    if (rel_y < SCROLL_MARGIN_Y)                                player.scrolly -= 4;
+    if (rel_y > (SCREEN_HEIGHT - SCROLL_MARGIN_Y - player.hitbox.height)) scroll_y += 4;
+    if (rel_y < SCROLL_MARGIN_Y) scroll_y -= 4;
 
     // clamp camera
-    if (player.scrollx < 0) player.scrollx = 0;
-    if (player.scrolly < 0) player.scrolly = 0;
+    if (scroll_x < 0) scroll_x = 0;
+    if (scroll_y < 0) scroll_y = 0;
 
     int max_scroll_x = TILEMAP_WIDTH*TILE_WIDTH - TILEMAP_DRAW_WIDTH*TILE_WIDTH;
     int max_scroll_y = 0;
 
-    if (player.scrollx > max_scroll_x) player.scrollx = max_scroll_x;
-    if (player.scrolly > max_scroll_y) player.scrolly = max_scroll_y;
+    if (scroll_x > max_scroll_x) scroll_x = max_scroll_x;
+    if (scroll_y > max_scroll_y) scroll_y = max_scroll_y;
 
     if ((get_tile_props(player.x, player.y + PLAYER_HITBOX_HEIGHT - 1) | 
         get_tile_props(player.x + 16 - 1, player.y + PLAYER_HITBOX_HEIGHT - 1)) & PROP_DANGER)

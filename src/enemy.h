@@ -26,7 +26,8 @@ typedef struct {
 } enemy_t;
 
 void detect_enemy_collision(void);
-void move_enemie(void);
+void move_enemy(enemy_t *e);
+void update_enemies();
 void detect_collision_tilemap(void);
 
 extern const enemy_template_t spawn_list[];
