@@ -17,6 +17,8 @@ player_t player;
 object_t platform;
 int scroll_x;
 int scroll_y;
+uint16_t game_timer = 0;
+uint8_t global_frame = 0;
 
 gfx_sprite_t *enemy_sprites[] = {
     cactusman,
@@ -41,7 +43,7 @@ void spawn_manager()
     {
         active_enemies[i] = (enemy_t){
             .active = true,
-            .hitbox = {16, 16},
+            .hitbox = (e->type == FIRE_GUY) ? {16, 32} : {16, 16},
             .type = e->type,
             .x = e->spawn_x,
             .y = e->spawn_y,
@@ -60,13 +62,21 @@ void despawn_manager()
 }
 
 
+// TODO: Draw enemies be updated to use tilemap animations for all enemies
 void draw_enemies()
 {
     enemy_t *e = &active_enemies[0];
     for (char i = 0; i < MAX_ACTIVE_ENEMIES; i++, e++) {
         if (e->active)
         {
-            gfx_TransparentSprite(enemy_sprites[e->type], e->rel_x, e->rel_y);
+            if (e->type == FIRE_GUY)
+            {
+                gfx_TransparentSprite(fire_tiles[global_frame], e->rel_x, e->rel_y);
+            }
+            else
+            {
+                gfx_TransparentSprite(enemy_sprites[e->type], e->rel_x, e->rel_y);
+            }
         }
     }
 }
@@ -102,6 +112,9 @@ int main(void)
 
     do
     {
+        game_timer++;
+        global_frame = (game_timer >> 1) & 7;
+
         uint8_t block_mapped;
         uint8_t block_ptr;
         kb_key_t arrows;
@@ -120,6 +133,7 @@ int main(void)
         pressed_right = (g7_key & kb_Right);
         pressed_up = (g7_key & kb_Up);
 
+
         move_player();
         update_enemies();
         move_objects();
@@ -127,6 +141,7 @@ int main(void)
         gfx_Tilemap(&tilemap, scroll_x, scroll_y);
         draw_sprite(player.rel_x, player.rel_y);
         draw_enemies();
+        detect_enemy_collision();
         gfx_SwapDraw();
         if (game_over)
         {

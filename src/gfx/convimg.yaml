@@ -14,6 +14,13 @@ converts:
       tile-height: 16
       images:
         - blueskytileset02.png
+  - name: fire_tileset
+    palette: global_palette
+    tilesets:
+      tile-width: 16
+      tile-height: 32
+      images:
+        - fire.png
   - name: sprites
     palette: global_palette
     images:
@@ -30,4 +37,5 @@ outputs:
       - global_palette
     converts:
       - minimal_tileset
+      - fire_tileset
       - sprites

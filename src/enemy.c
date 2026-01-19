@@ -3,10 +3,12 @@
 
 #include "defines.h"
 #include "enemy.h"
+#include "player.h"
 #include "tile_handlers.h"
 
 extern bool game_over;
 extern int scroll_x, scroll_y;
+extern player_t player;
 
 enemy_t active_enemies[MAX_ACTIVE_ENEMIES];
 
@@ -20,9 +22,12 @@ void update_enemies()
     }
 }
 
+
+/**
+ * 
+ */
 void detect_collison_tilemap()
 {
-
 }
 
 
@@ -31,6 +36,22 @@ void detect_collison_tilemap()
  */
 void detect_enemy_collision(void)
 {
+    enemy_t *e = &active_enemies[0];
+
+    for (char i = 0; i < MAX_ACTIVE_ENEMIES; i++, e++)
+    {
+        if (e->active != true) continue;
+        if (e->rel_x < -16 || e->rel_x > 320) continue; 
+
+        if (
+            player.x < e->x + e->hitbox.width &&
+            player.x + player.hitbox.width > e->x &&
+            player.y < e->y + e->hitbox.height &&
+            player.y + player.hitbox.height > e->y
+        ){
+            game_over = true;
+        }
+    }
 
 }
 
