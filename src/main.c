@@ -6,11 +6,8 @@
 #include "object.h"
 #include "defines.h"
 #include "enemy.h"
-
-/* Include the converted graphics file */
 #include "gfx/gfx.h"
 
-/* Include the external tilemap data */
 extern unsigned char tilemap_map[];
 
 player_t player;
@@ -27,7 +24,6 @@ gfx_sprite_t *enemy_sprites[] = {
 
 bool game_over = true;
 
-/* Prototype for draw sprite */
 void draw_sprite(int x, int y);
 void init_player(void);
 void init_objects(void);
@@ -35,6 +31,9 @@ void draw_platform(void);
 void init_enemies(void);
 void draw_enemy(void);
 
+/**
+ * Allocate resources for active enemies
+ */
 void spawn_manager()
 {
     enemy_template_t *e = &spawn_list[0];
@@ -56,9 +55,13 @@ void spawn_manager()
 }
 
 
+// TODO
+
+/**
+ * Remove resources for inactive enemies
+ */
 void despawn_manager()
 {
-
 }
 
 
@@ -133,7 +136,6 @@ int main(void)
         pressed_right = (g7_key & kb_Right);
         pressed_up = (g7_key & kb_Up);
 
-
         move_player();
         update_enemies();
         move_objects();
@@ -156,6 +158,9 @@ int main(void)
 }
 
 
+/**
+ * Init the player state
+ */
 void init_player(void)
 {
     player.x = START_X;
@@ -169,6 +174,9 @@ void init_player(void)
 }
 
 
+/**
+ * Init in game objects
+ */
 void init_objects(void)
 {
     platform.bounding_box.width = 32;
@@ -178,6 +186,9 @@ void init_objects(void)
 }
 
 
+/**
+ * Draw a sprite at world coords
+ */
 void draw_sprite(int x, int y)
 {
     gfx_TransparentSprite(Sprite0003, x, y);
