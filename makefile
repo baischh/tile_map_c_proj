@@ -1,18 +1,12 @@
-# ----------------------------
-# Makefile Options
-# ----------------------------
-
 NAME = minmap
 ICON = icon.png
-DESCRIPTION = "CE C Toolchain Demo"
+DESCRIPTION = "Platformer style game"
 COMPRESSED = NO
 
 CFLAGS = -Wall -Wextra -Oz
 CXXFLAGS = -Wall -Wextra -Oz
 
 EXTRA_C_SOURCES = src/tilemap/tilemap.c
-
-# ----------------------------
 
 include $(shell cedev-config --makefile)
 
